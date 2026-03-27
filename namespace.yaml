@@ -1,0 +1,17 @@
+---
+- name: Collect nameservers from inventory hosts
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Get nameservers from resolv.conf
+      shell: "grep '^nameserver' /etc/resolv.conf| egrep -v '$^|#' | awk '{print $2}'"
+      register: ns_output
+
+    - name: Format nameservers into list (max 4)
+      set_fact:
+        nameservers: "{{ ns_output.stdout_lines + ['','','',''] }}"
+
+    - name: Print formatted output
+      debug:
+        msg: "{{ inventory_hostname }},{{ nameservers[0] }},{{ nameservers[1] }},{{ nameservers[2] }},{{ nameservers[3] }}"
